@@ -1,62 +1,64 @@
-const mongoose = require('mongoose');
+const { Schema, model, Types } = require('mongoose');
+const dateFormat = require('../utils/dateFormat');
 
-const reactionSchema = new mongoose.Schema({
+// Reaction schema
+const reactionSchema = new Schema({
   reactionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    default: () => new mongoose.Types.ObjectId()
+    type: Schema.Types.ObjectId,
+    default: () => new Types.ObjectId(),
   },
   reactionBody: {
     type: String,
     required: true,
-    maxlength: 280
+    maxlength: 280,
   },
   username: {
     type: String,
-    required: true
+    required: true,
   },
   createdAt: {
     type: Date,
     default: Date.now,
-    get: (timestamp) => new Date(timestamp).toLocaleString() // You can format it differently
-  }
-},
-{
-  toJSON: {
-    getters: true
+    get: (timestamp) => dateFormat(timestamp),
   },
-  id: false
+}, {
+  toJSON: {
+    getters: true,
+  },
+  id: false,
 });
 
-const ThoughtSchema = new mongoose.Schema({
+// Thought schema
+const thoughtSchema = new Schema({
   thoughtText: {
     type: String,
     required: true,
     minlength: 1,
-    maxlength: 280
+    maxlength: 280,
   },
   createdAt: {
     type: Date,
     default: Date.now,
-    get: (timestamp) => new Date(timestamp).toLocaleString()
+    get: (timestamp) => dateFormat(timestamp),
   },
   username: {
     type: String,
-    required: true
+    required: true,
   },
-  reactions: [reactionSchema]
-},
-{
+  reactions: [reactionSchema],
+}, {
   toJSON: {
     virtuals: true,
-    getters: true
+    getters: true,
   },
-  id: false
+  id: false,
 });
 
-// Create a virtual for reaction count
-ThoughtSchema.virtual('reactionCount').get(function() {
+// Virtual for reaction count
+thoughtSchema.virtual('reactionCount').get(function () {
   return this.reactions.length;
 });
 
-const Thought = mongoose.model('Thought', ThoughtSchema);
+const Thought = model('Thought', thoughtSchema);
+
 module.exports = Thought;
